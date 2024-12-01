@@ -1,23 +1,33 @@
-package com.jungwoo.tukoreacarpool.Controller;import java.io.*;
+package com.jungwoo.tukoreacarpool.controller;
+import java.io.*;
+
+import com.jungwoo.tukoreacarpool.dao.UserDAO;
+import com.jungwoo.tukoreacarpool.dataobject.UserDO;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
-@WebServlet(name = "UserControllerServlet", value = "/UserController-servlet")
+@WebServlet("/user")
 public class UserController extends HttpServlet {
-    private String message;
+    private static final long serialVersionUID = 1L;
+    private UserDAO userDAO;
 
-    public void init() {
-        message = "Hello World!";
+    public void init() throws ServletException {
+        userDAO = new UserDAO();
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        HttpSession session = req.getSession(false);
+        UserDO user = userDAO.getUserByEmail((String) session.getAttribute("email"));
 
-        // Hello
-        PrintWriter out = response.getWriter();
-        out.println("<html><body>");
-        out.println("<h1>" + message + "</h1>");
-        out.println("</body></html>");
+        req.setCharacterEncoding("UTF-8");
+        req.setAttribute("title", "유저정보");
+        req.setAttribute("content", "/user.jsp");
+        req.setAttribute("user", user);
+
+        RequestDispatcher rd = req.getRequestDispatcher("/layouts/main_layout.jsp");
+        rd.forward(req, res);
     }
 
     public void destroy() {

@@ -1,4 +1,4 @@
-package com.jungwoo.tukoreacarpool.Enum;
+package com.jungwoo.tukoreacarpool.types;
 
 public enum PartyType {
     TAXI,

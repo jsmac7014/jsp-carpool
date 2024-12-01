@@ -1,6 +1,6 @@
-package com.jungwoo.tukoreacarpool.DO;
+package com.jungwoo.tukoreacarpool.dataobject;
 
-import com.jungwoo.tukoreacarpool.Enum.PartyUserType;
+import com.jungwoo.tukoreacarpool.types.PartyUserType;
 
 public class PartyUserDO {
     private int id;

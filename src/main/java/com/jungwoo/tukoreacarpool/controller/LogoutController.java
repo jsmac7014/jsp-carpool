@@ -1,25 +1,17 @@
-package com.jungwoo.tukoreacarpool.Controller;import java.io.*;
+package com.jungwoo.tukoreacarpool.controller;
+
+import java.io.*;
+
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
-@WebServlet(name = "LogoutControllerServlet", value = "/LogoutController-servlet")
+@WebServlet("/logout")
 public class LogoutController extends HttpServlet {
-    private String message;
+    private static final long serialVersionUID = 1L;
 
-    public void init() {
-        message = "Hello World!";
-    }
-
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
-
-        // Hello
-        PrintWriter out = response.getWriter();
-        out.println("<html><body>");
-        out.println("<h1>" + message + "</h1>");
-        out.println("</body></html>");
-    }
-
-    public void destroy() {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        HttpSession session = req.getSession();
+        session.invalidate();
+        res.sendRedirect(req.getContextPath() + "/");
     }
 }

@@ -13,8 +13,10 @@
     <title>
         ${title}
     </title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="${pageContext.request.contextPath}/static/favicon.ico?" sizes="any" type="image/x-icon">
+    <link rel="apple-touch-icon" href="${pageContext.request.contextPath}/static/apple-touch-icon.png?">
 </head>
 <body>
     <jsp:include page="${content}"/>

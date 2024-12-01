@@ -1,45 +1,11 @@
-package com.jungwoo.tukoreacarpool.DAO;
+package com.jungwoo.tukoreacarpool.dao;
 
-import com.jungwoo.tukoreacarpool.DO.UserDO;
+import com.jungwoo.tukoreacarpool.dataobject.UserDO;
 
 import java.sql.*;
 import org.mindrot.jbcrypt.BCrypt;
 
-public class UserDAO {
-    Connection conn = null;
-    PreparedStatement pst = null;
-
-    String jdbc_driver = "com.mysql.cj.jdbc.Driver";
-    String jdbc_url = "jdbc:mysql://localhost:3307/carpool?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC";
-    String username = "root";
-    String password = "";
-
-    void connect() {
-        try {
-            Class.forName(jdbc_driver);
-            conn = DriverManager.getConnection(jdbc_url, username, password);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void disconnect() {
-        if (pst != null) {
-            try {
-                pst.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
+public class UserDAO extends BaseDAO {
     public boolean createUser(UserDO user) {
         connect();
         String sql = "INSERT INTO users (username, password, email, verified) VALUES (?, ?, ?, ?)";
@@ -62,18 +28,18 @@ public class UserDAO {
         return true;
     }
 
-    public boolean validateUser(UserDO user) {
+    public boolean validateUser(String email, String userPassword) {
         connect();
-        String sql = "SELECT password FROM users WHERE username = ?";
+        String sql = "SELECT password FROM users WHERE email = ?";
         try {
             pst = conn.prepareStatement(sql);
-            pst.setString(1, user.getUsername());
+            pst.setString(1, email);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
                 String password = rs.getString("password");
 
-                return BCrypt.checkpw(user.getPassword(), password);
+                return BCrypt.checkpw(userPassword, password);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,4 +49,43 @@ public class UserDAO {
         }
         return false;
     }
+
+    public UserDO getUserByEmail(String email) {
+        connect();
+        String sql = "SELECT id, username, email, verified FROM users WHERE email = ?";
+        UserDO user = new UserDO();
+        try {
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, email);
+            ResultSet rs = pst.executeQuery();
+
+            while(rs.next()) {
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setVerified(rs.getBoolean("verified"));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            disconnect();
+        }
+        return user;
+    }
+
+    public void updateUserVerified(String email) {
+        connect();
+        String sql = "UPDATE users SET verified = ? WHERE email = ?";
+        try {
+            pst = conn.prepareStatement(sql);
+            pst.setBoolean(1, true);
+            pst.setString(2, email);
+            pst.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

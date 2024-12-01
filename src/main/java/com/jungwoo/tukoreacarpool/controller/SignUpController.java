@@ -1,16 +1,15 @@
-package com.jungwoo.tukoreacarpool.Controller;
+package com.jungwoo.tukoreacarpool.controller;
 
 import java.io.*;
+import java.util.regex.Pattern;
 
-import com.jungwoo.tukoreacarpool.DAO.UserDAO;
-import com.jungwoo.tukoreacarpool.DO.UserDO;
+import com.jungwoo.tukoreacarpool.dao.UserDAO;
+import com.jungwoo.tukoreacarpool.dataobject.UserDO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import org.mindrot.jbcrypt.BCrypt;
 
 @WebServlet("/sign-up")
 public class SignUpController extends HttpServlet {
@@ -22,8 +21,14 @@ public class SignUpController extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");
+        // 이미 로그인되어 있는 경우 홈으로 리다이렉션
+        HttpSession session = req.getSession();
+        if(session != null && session.getAttribute("username") != null) {
+            res.sendRedirect("/");
+            return;
+        }
 
+        req.setCharacterEncoding("UTF-8");
         req.setAttribute("title", "회원가입");
         req.setAttribute("content", "/sign-up.jsp");
 
@@ -50,6 +55,17 @@ public class SignUpController extends HttpServlet {
             return;
         }
 
+//      email should only be from @tukorea.ac.kr
+        String emailPattern = "^[a-zA-Z0-9._%+-]+@tukorea\\.ac\\.kr$";
+        if(!Pattern.matches(emailPattern, email)) {
+            req.setAttribute("error", "이메일이 @tukorea.ac.kr로 끝나는지 확인해주세요.");
+            req.setAttribute("content", "/sign-up.jsp");
+            RequestDispatcher rd = req.getRequestDispatcher("/layouts/main_layout.jsp");
+            rd.forward(req, res);
+            return;
+        }
+//        TODO Check if email exist
+
         UserDO user = new UserDO();
         user.setUsername(username);
         user.setPassword(password);
@@ -58,6 +74,6 @@ public class SignUpController extends HttpServlet {
 
         userDAO.createUser(user);
 
-        res.sendRedirect("/sign-in");
+        res.sendRedirect(req.getContextPath() + "/sign-in");
     }
 }
